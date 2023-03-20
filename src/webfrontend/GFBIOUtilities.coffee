@@ -254,13 +254,19 @@ class GFBIOUtilities
   # get vocabulary-notation from finto-uri
   ############################################################################
 
-  @getVocNotationFromURI: (uri) ->
-    uri = decodeURIComponent(uri)
-    uri = uri.replace('http://www.yso.fi/onto/', '')
-    uriParts = uri.split('/')
-    notation = uriParts[0]
+  @isURIEncoded: (str) ->
+      return typeof str == "string" && decodeURIComponent(str) != str;
 
-    notation
+
+  @getVocNotationFromURI: (uri) ->
+    if @.isURIEncoded
+      uriParts = decodeURIComponent(uri).split('/')
+    else
+      uriParts = uri.split('/')
+
+    vocNotation = uriParts[uriParts.length-2]
+
+    return vocNotation
 
 
   #############################################################################

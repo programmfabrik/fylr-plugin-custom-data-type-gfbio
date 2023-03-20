@@ -6,14 +6,15 @@ const fetch = (...args) => import('node-fetch').then(({
 
 let databaseLanguages = [];
 let frontendLanguages = [];
+let gfbio_apikey = '';
 
 
 function hasChanges(objectOne, objectTwo) {
   var len;
-  const ref = ["conceptName", "conceptURI", "_standard", "_fulltext", "conceptAncestors", "frontendLanguage", "conceptNameChosenByHand"];
+  const ref = ["conceptName", "conceptURI", "conceptSource", "_standard", "_fulltext", "conceptAncestors", "frontendLanguage"];
   for (let i = 0, len = ref.length; i < len; i++) {
     let key = ref[i];
-    if (!FINTOUtilities.isEqual(objectOne[key], objectTwo[key])) {
+    if (!GFBIOUtilities.isEqual(objectOne[key], objectTwo[key])) {
       return true;
     }
   }
@@ -33,7 +34,7 @@ main = (payload) => {
     case "update":
 
       ////////////////////////////////////////////////////////////////////////////
-      // run finto-api-call for every given uri
+      // run gfbio-api-call for every given uri
       ////////////////////////////////////////////////////////////////////////////
 
       // collect URIs
@@ -48,8 +49,9 @@ main = (payload) => {
       let requests = [];
 
       URIList.forEach((uri) => {
-        let dataRequestUrl = 'https://api.finto.fi/rest/v1/data?uri=' + encodeURIComponent(uri) + '&format=application%2Fjson';
-        let hierarchieRequestUrl = 'https://api.finto.fi/rest/v1/' + FINTOUtilities.getVocNotationFromURI(uri) + '/hierarchy?uri=' + encodeURIComponent(uri) + '&lang=fi&format=application%2Fjson';
+        let dataRequestUrl = 'https://data.bioontology.org/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '?apikey=' + gfbio_apikey
+        let hierarchieRequestUrl = 'https://data.bioontology.org/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '/ancestors' + '?apikey=' + gfbio_apikey
+
         let dataRequest = fetch(dataRequestUrl);
         let hierarchieRequest = fetch(hierarchieRequestUrl);
         requests.push({
@@ -72,7 +74,7 @@ main = (payload) => {
         responses.forEach((response, index) => {
           let url = requests[index].url;
           let uri = requests[index].uri;
-          let requestType = (url.includes('hierarchy?uri')) ? 'broader' : 'data';
+          let requestType = (url.includes('ancestors?apikey')) ? 'broader' : 'data';
           let result = {
             url: url,
             requestType: requestType,
@@ -92,12 +94,8 @@ main = (payload) => {
         let results = [];
         data.forEach((data, index) => {
           let url = requests[index].url;
-          console.error("url");
-          console.error(url);
           let uri = requests[index].uri;
-          console.error("uri");
-          console.error(uri);
-          let requestType = (url.includes('hierarchy?uri')) ? 'broader' : 'data';
+          let requestType = (url.includes('ancestors?apikey')) ? 'broader' : 'data';
           let result = {
             url: url,
             requestType: requestType,
@@ -115,8 +113,8 @@ main = (payload) => {
         let cdataList = [];
         payload.objects.forEach((result, index) => {
           let originalCdata = payload.objects[index].data;
-          console.error("originalCdata");
-          console.error(originalCdata);
+          //console.error("originalCdata");
+          //console.error(originalCdata);
           let newCdata = {};
           let originalURI = originalCdata.conceptURI;
 
@@ -130,28 +128,22 @@ main = (payload) => {
             ///////////////////////////////////////////////////////
             // conceptName, conceptURI, _standard, _fulltext, facet, frontendLanguage
             if (matchingRecordData.requestType == 'data') {
-              resultJSON = false;
-              // read only the needed part
-              matchingRecordData.data.graph.forEach(function(json) {
-                if (json.uri == uri) {
-                  resultJSON = json;
-                }
-              });
+              resultJSON = matchingRecordData.data;
               if (resultJSON) {
                 // get desired language for preflabel. This is frontendlanguage from original data...
                 let desiredLanguage = originalCdata.frontendLanguage;
                 // save conceptName
-                newCdata.conceptName = FINTOUtilities.getPrefLabelFromDataResult(resultJSON, desiredLanguage, frontendLanguages);
+                newCdata.conceptName = resultJSON.prefLabel;
                 // save conceptURI
-                newCdata.conceptURI = uri;
+                newCdata.conceptURI = resultJSON['@id'];
                 // save conceptSource
-                newCdata.conceptSource = FINTOUtilities.getVocNotationFromURI(uri);
+                newCdata.conceptSource = GFBIOUtilities.getVocNotationFromURI(uri);
                 // save _fulltext
-                newCdata._fulltext = FINTOUtilities.getFullTextFromJSONObject(resultJSON, databaseLanguages);
+                newCdata._fulltext = GFBIOUtilities.getFullTextFromJSONObject(resultJSON, databaseLanguages);
                 // save _standard
-                newCdata._standard = FINTOUtilities.getStandardFromJSONObject(resultJSON, databaseLanguages);
+                newCdata._standard = GFBIOUtilities.getStandardFromJSONObject(resultJSON, databaseLanguages);
                 // save facet
-                newCdata.facetTerm = FINTOUtilities.getFacetTermFromJSONObject(resultJSON, databaseLanguages);
+                newCdata.facetTerm = GFBIOUtilities.getFacetTermFromJSONObject(resultJSON, databaseLanguages);
                 // save frontend language (same as given)
                 newCdata.frontendLanguage = originalCdata.frontendLanguage;
               }
@@ -160,44 +152,28 @@ main = (payload) => {
             ///////////////////////////////////////////////////////
             // ancestors
             if (matchingRecordHierarchy.requestType == 'broader') {
-              let hierarchyJSON = matchingRecordHierarchy.data.broaderTransitive
+              let hierarchyJSON = matchingRecordHierarchy.data
               // save ancestors if treeview, add ancestors
               newCdata.conceptAncestors = [];
-              for (let i = 1; i < Object.keys(hierarchyJSON).length; i++) {
-                for (let [hierarchyKey, hierarchyValue] of Object.entries(hierarchyJSON)) {
-                  if (hierarchyKey !== uri) {
-                    // check if hierarchy-entry contains the actual record in narrowers
-                    // or if the narrower of the hierarchy-entry contains one of the already set ancestors
-                    let isnarrower = false;
-                    if (hierarchyValue.narrower) {
-                      if (!Array.isArray(hierarchyValue.narrower)) {
-                        hierarchyValue.narrower = [hierarchyValue.narrower];
-                      }
-                      for (let narrower of hierarchyValue.narrower) {
-                        if (narrower.uri === uri) {
-                          if (!newCdata.conceptAncestors.includes(hierarchyValue.uri)) {
-                            newCdata.conceptAncestors.push(hierarchyValue.uri);
-                          }
-                        } else if (newCdata.conceptAncestors.includes(narrower.uri)) {
-                          if (!newCdata.conceptAncestors.includes(hierarchyValue.uri)) {
-                            newCdata.conceptAncestors.push(hierarchyValue.uri);
-                          }
-                        }
-                      }
-                    }
-                  }
+
+              for (hierarchyKey = i = 0, len = hierarchyJSON.length; i < len; hierarchyKey = ++i) {
+                hierarchyValue = hierarchyJSON[hierarchyKey];
+                if (hierarchyKey !== resultJSON['@id']) {
+                  newCdata.conceptAncestors.push(hierarchyValue['@id']);
                 }
               }
+
               // add own uri to ancestor-uris
-              newCdata.conceptAncestors.push(uri);
+              newCdata.conceptAncestors.push(resultJSON['@id']);
+
               // merge ancestors to string
               newCdata.conceptAncestors = newCdata.conceptAncestors.join(' ');
 
-              console.error("newCdata");
-              console.error(newCdata);
+              //console.error("newCdata");
+              //console.error(newCdata);
 
               if (hasChanges(payload.objects[index].data, newCdata)) {
-                console.error("_________________________has changes!!________________");
+                //console.error("_________________________has changes!!________________");
                 payload.objects[index].data = newCdata;
               } else {}
             }
@@ -258,24 +234,29 @@ outputErr = (err2) => {
 
   let config = JSON.parse(process.argv[2]);
 
+  // apikey from baseconfig
+  gfbio_apikey = config.config['plugin']['custom-data-type-gfbio'].config.apikey.apikey;
+
+  // database-languages
   databaseLanguages = config.config.system.config.languages.database;
   databaseLanguages = databaseLanguages.map((value, key, array) => {
     return value.value;
   });
 
+  // frontend-languages
   frontendLanguages = config.config.system.config.languages.frontend;
 
   ////////////////////////////////////////////////////////////////////////////
-  // availabilityCheck for finto-api
+  // availabilityCheck for gfbio-api
   ////////////////////////////////////////////////////////////////////////////
-  https.get('https://api.finto.fi/rest/v1/vocabularies?lang=fi', res => {
+  https.get('https://data.bioontology.org/ontologies/NCBITAXON?apikey=' + gfbio_apikey, res => {
     let testData = [];
     res.on('data', chunk => {
       testData.push(chunk);
     });
     res.on('end', () => {
-      const vocabs = JSON.parse(Buffer.concat(testData).toString());
-      if (vocabs.vocabularies) {
+      const testVocab = JSON.parse(Buffer.concat(testData).toString());
+      if (testVocab.acronym == 'NCBITAXON') {
         ////////////////////////////////////////////////////////////////////////////
         // test successfull --> continue with custom-data-type-update
         ////////////////////////////////////////////////////////////////////////////
@@ -298,10 +279,10 @@ outputErr = (err2) => {
           }
         });
       } else {
-        console.error('Error while interpreting data from api.finto.fi: ', err.message);
+        console.error('Error while interpreting data from GFBIO-API.');
       }
     });
   }).on('error', err => {
-    console.error('Error while receiving data from api.finto.fi: ', err.message);
+    console.error('Error while receiving data from GFBIO-API: ', err.message);
   });
 })();
