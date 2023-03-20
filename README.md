@@ -64,7 +64,7 @@ The update mechanism for the plugin data can be configured here.
 * _standard
     * List of preferred labels in different languages
 * _facet
-    * URI combined with preferred label in given frontend-language and in all other configured data-languages (as far as provided by the FINTO-API.)
+    * URI combined with preferred label
 
 
 
