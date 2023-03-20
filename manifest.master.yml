@@ -1,0 +1,75 @@
+plugin:
+  name: custom-data-type-gfbio
+  version: 1.0
+  url: https://github.com/programmfabrik/fylr-custom-data-type-gfbio
+  displayname:
+    de-DE: GFBIO-Verknüpfung
+    en-US: GFBIO-Referencing
+  info:
+    de-DE: Stellt Verknüpfungen zum gfbio-Terminology-Service her
+    en-US: Links to the gfbio-Terminology-Service
+  l10n: l10n/customDataTypeGfbio.csv
+  webfrontend:
+    url: customDataTypeGfbio.js
+    css: customDataTypeGfbio.css
+
+base_url_prefix: "webfrontend"
+
+custom_types:
+  gfbio:
+    mapping:
+      conceptName:
+        type: text
+      conceptURI:
+        type: text
+      conceptSource:
+        type: text
+      conceptAncestors:
+        type: text
+      facetTerm:
+        type: text_l10n
+    config:
+      schema:
+        - name: vocabulary_notation
+          parameters:
+            value:
+              type: text
+      mask:
+        - name: editor_style
+          parameters:
+            value:
+              type: select
+              options: ["popover", "popover_treeview"]
+    update:
+      exec:
+        service: "node"
+        commands:
+          - prog: "node"
+            stdin:
+              type: body
+            stdout:
+              type: body
+            args:
+              - type: "value"
+                value: "%_exec.pluginDir%/updater/GfbioUpdater.js"
+              - type: "value"
+                value: "%info.json%"
+      timeout: 60
+      batch_size: 1
+      expires_days: 1
+      interval_base_config: update_interval_gfbio.days
+base_config:
+  - name: apikey
+    group: apikey
+    parameters:
+      apikey:
+        type: text
+        position: 0
+  - name: update_interval_gfbio
+    group: update_custom_data_type
+    parameters:
+      days:
+        type: int
+        min: 0
+        default: 0
+        position: 0
