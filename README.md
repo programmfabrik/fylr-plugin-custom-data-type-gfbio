@@ -44,7 +44,7 @@ The update mechanism for the plugin data can be configured here.
 * apikey
   * GFBio-Apikey (if needed)
 * days between updates
-  * The data stored in fylr is compared with the data from the FINTO API and then updated and re-indexed in fylr if necessary. This creates a corresponding load on the FINTO API.
+  * The data stored in fylr is compared with the data from the GFBIO API and then updated and re-indexed in fylr if necessary. This creates a corresponding load on the GFBIO API.
 
 
 ## saved data
