@@ -62,12 +62,25 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
     language = @getCustomSchemaSettings()?.lang?.value
     # if not configures in db-modell, use frontendlanguage
     if !language
-      desiredLanguage = Object.assign({}, ez5.loca.getLanguage())
+      desiredLanguage = ez5.loca.getLanguage()
       desiredLanguage = desiredLanguage.split('-')
       language = desiredLanguage[0]
 
     return language
 
+  #######################################################################
+  # returns the databaseLanguages
+  getDatabaseLanguages: () ->
+    databaseLanguages = ez5.loca.getLanguageControl().getLanguages().slice()
+
+    return databaseLanguages
+
+  #######################################################################
+  # returns the frontendLanguages
+  getFrontendLanguages: () ->
+    frontendLanguages = ez5.session.getConfigFrontendLanguages().slice()
+
+    return frontendLanguages
 
   #######################################################################
   # render popup as treeview?
@@ -446,8 +459,8 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
                     allHierarchyAPIPath = hierarchyLink + '?apikey=' + that.getApiKeyFromBaseconfig()
                     dataHierarchy_xhr = new (CUI.XHR)(url: allHierarchyAPIPath)
                     dataHierarchy_xhr.start().done((hierarchyJSON, status, statusText) ->
-                      databaseLanguages = Object.assign({}, ez5.loca.getLanguageControl().getLanguages())
-                      frontendLanguages = Object.assign({}, ez5.session.getConfigFrontendLanguages())
+                      databaseLanguages = that.getDatabaseLanguages()
+                      frontendLanguages = that.getFrontendLanguage()
                       desiredLanguage = that.getLanguageParameterForRequests()
 
                       # save conceptName
@@ -575,7 +588,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
         dataHierarchy_xhr = new (CUI.XHR)(url: allHierarchyAPIPath)
         dataHierarchy_xhr.start().done((hierarchyJSON, status, statusText) ->
             resultJSON.ancestors = hierarchyJSON
-            htmlContent = GFBIOUtilities.getJSONPreview(resultJSON, decodeURIComponent(uri), that.getLanguageParameterForRequests(), Object.assign({}, ez5.session.getConfigFrontendLanguages()))
+            htmlContent = GFBIOUtilities.getJSONPreview(resultJSON, decodeURIComponent(uri), that.getLanguageParameterForRequests(), that.getFrontendLanguages())
             tooltip.DOM.innerHTML = htmlContent
             tooltip.autoSize()
         )

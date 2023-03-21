@@ -255,9 +255,7 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
                                 dataHierarchy_xhr = new (CUI.XHR)(url: allHierarchyAPIPath)
                                 dataHierarchy_xhr.start().done((hierarchyJSON, status, statusText) ->
 
-                                  databaseLanguages = Object.assign({}, ez5.loca.getLanguageControl().getLanguages())
-                                  frontendLanguages = Object.assign({}, ez5.session.getConfigFrontendLanguages())
-                                  desiredLanguage = CustomDataTypeGFBIO.prototype.getLanguageParameterForRequests()
+                                  databaseLanguages = CustomDataTypeGFBIO.prototype.getDatabaseLanguages()
 
                                   # save conceptName
                                   that._cdata.conceptName = resultJSON.prefLabel
