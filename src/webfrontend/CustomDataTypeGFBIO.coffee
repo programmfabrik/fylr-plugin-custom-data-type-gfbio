@@ -326,7 +326,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
             # are there multible vocs in datamodel?
             multibleVocs = false
             vocTest = that.getVocabularyNameFromDatamodel()
-            vocTestArr = vocTest.split(' ')
+            vocTestArr = vocTest.split(',')
 
             if vocTestArr.length > 1
               multibleVocs = true
@@ -489,8 +489,6 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
                       # merge ancestors to string
                       cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
 
-                      console.warn "cdata", cdata
-
                       if resultJSON.prefLabel.length > 0
                         # update the layout in form
                         that.__updateResult(cdata, layout, opts)
@@ -612,7 +610,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
     else
       # else get first voc from given voclist (1-n)
       vocParameter = that.getActiveVocabularyName(cdata)
-      vocParameter = vocParameter.split('|')
+      vocParameter = vocParameter.split(',')
       vocParameter = vocParameter[0]
 
     apikey = that.getApiKeyFromBaseconfig()
@@ -628,6 +626,8 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
         class: "cui-pane gfbio_treeviewPane"
         center:
             content: [
+                cdata_form
+              ,
                 treeview.treeview
             ]
 
@@ -679,14 +679,15 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
         if elem.opts.name == 'gfbio_PopoverVocabularySelect' && that.renderPopupAsTreeview()
           @buildAndSetTreeviewLayout(@popover, layout, cdata, cdata_form, that, false, opts)
         that.__setEditorFieldStatus(cdata, layout)
-        if elem.opts.name == 'searchbarInput' || elem.opts.name == 'gfbio_PopoverVocabularySelect'  || elem.opts.name == 'gfbio_countSuggestions'
+        if elem.opts.name == 'searchbarInput' || elem.opts.name == 'gfbio_countSuggestions'
           that.__updateSuggestionsMenu(cdata, cdata_form, data.searchbarInput, elem, suggest_Menu, searchsuggest_xhr, layout, opts)
     .start()
 
     # init suggestmenu
-    suggest_Menu = new CUI.Menu
-        element : cdata_form.getFieldsByName("searchbarInput")[0]
-        use_element_width_as_min_width: true
+    if ! that.renderPopupAsTreeview()
+      suggest_Menu = new CUI.Menu
+          element : cdata_form.getFieldsByName("searchbarInput")[0]
+          use_element_width_as_min_width: true
 
     # treeview?
     if that.renderPopupAsTreeview()
@@ -789,8 +790,8 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
           )
         ]
       }
-
-    fields.push maxhits
+    if ! that.renderPopupAsTreeview()
+      fields.push maxhits
 
     # searchfield (autocomplete)
     option =  {
@@ -802,7 +803,8 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
           placeholder: $$("custom.data.type.gfbio.modal.form.text.searchbar.placeholder")
           name: "searchbarInput"
         }
-    fields.push option
+    if ! that.renderPopupAsTreeview()
+      fields.push option
 
     fields
 

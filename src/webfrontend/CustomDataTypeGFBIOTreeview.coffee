@@ -11,7 +11,7 @@ class GFBIO_ListViewTree
     #############################################################################
     # construct
     #############################################################################
-    constructor: (@popover = null, @editor_layout = null, @cdata = null, @cdata_form = null, @context = null, @gfbio_opts = {}, @vocParameter = 'yso', @apikey = '') ->
+    constructor: (@popover = null, @editor_layout = null, @cdata = null, @cdata_form = null, @context = null, @gfbio_opts = {}, @vocParameter = 'ITIS', @apikey = '') ->
 
         options =
           class: "gfbioPlugin_Treeview"
@@ -282,8 +282,6 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
                                   that._cdata.conceptAncestors.push resultJSON['@id']
                                   # merge ancestors to string
                                   that._cdata.conceptAncestors = that._cdata.conceptAncestors.join(' ')
-
-                                  console.log "that._cdata", that._cdata
 
                                   # is this from exact search and user has to choose exact-search-mode?!
                                   if that._gfbio_opts?.callFromExpertSearch == true
