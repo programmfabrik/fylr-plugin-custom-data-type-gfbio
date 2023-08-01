@@ -7,6 +7,7 @@ const fetch = (...args) => import('node-fetch').then(({
 let databaseLanguages = [];
 let frontendLanguages = [];
 let gfbio_apikey = '';
+let endpointurl = '';
 
 
 function hasChanges(objectOne, objectTwo) {
@@ -49,8 +50,8 @@ main = (payload) => {
       let requests = [];
 
       URIList.forEach((uri) => {
-        let dataRequestUrl = 'https://data.bioontology.org/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '?apikey=' + gfbio_apikey
-        let hierarchieRequestUrl = 'https://data.bioontology.org/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '/ancestors' + '?apikey=' + gfbio_apikey
+        let dataRequestUrl = endpointurl + '/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '?apikey=' + gfbio_apikey
+        let hierarchieRequestUrl = endpointurl + '/ontologies/' + GFBIOUtilities.getVocNotationFromURI(uri) + '/classes/' + encodeURIComponent(uri) + '/ancestors' + '?apikey=' + gfbio_apikey
 
         let dataRequest = fetch(dataRequestUrl);
         let hierarchieRequest = fetch(hierarchieRequestUrl);
@@ -113,8 +114,6 @@ main = (payload) => {
         let cdataList = [];
         payload.objects.forEach((result, index) => {
           let originalCdata = payload.objects[index].data;
-          //console.error("originalCdata");
-          //console.error(originalCdata);
           let newCdata = {};
           let originalURI = originalCdata.conceptURI;
 
@@ -153,29 +152,31 @@ main = (payload) => {
             // ancestors
             if (matchingRecordHierarchy.requestType == 'broader') {
               let hierarchyJSON = matchingRecordHierarchy.data
-              // save ancestors if treeview, add ancestors
-              newCdata.conceptAncestors = [];
+              if (hierarchyJSON) {
+                // save ancestors if treeview, add ancestors
+                newCdata.conceptAncestors = [];
 
-              for (hierarchyKey = i = 0, len = hierarchyJSON.length; i < len; hierarchyKey = ++i) {
-                hierarchyValue = hierarchyJSON[hierarchyKey];
-                if (hierarchyKey !== resultJSON['@id']) {
-                  newCdata.conceptAncestors.push(hierarchyValue['@id']);
+                for (hierarchyKey = i = 0, len = hierarchyJSON.length; i < len; hierarchyKey = ++i) {
+                  hierarchyValue = hierarchyJSON[hierarchyKey];
+                  if (hierarchyKey !== resultJSON['@id']) {
+                    newCdata.conceptAncestors.push(hierarchyValue['@id']);
+                  }
                 }
+                // add own uri to ancestor-uris
+                newCdata.conceptAncestors.push(resultJSON['@id']);
+
+                // merge ancestors to string
+                newCdata.conceptAncestors = newCdata.conceptAncestors.join(' ');
               }
 
-              // add own uri to ancestor-uris
-              newCdata.conceptAncestors.push(resultJSON['@id']);
-
-              // merge ancestors to string
-              newCdata.conceptAncestors = newCdata.conceptAncestors.join(' ');
-
-              //console.error("newCdata");
-              //console.error(newCdata);
-
-              if (hasChanges(payload.objects[index].data, newCdata)) {
-                //console.error("_________________________has changes!!________________");
-                payload.objects[index].data = newCdata;
-              } else {}
+              if (newCdata.conceptURI) {
+                if (hasChanges(payload.objects[index].data, newCdata)) {
+                  console.error("_________________________has changes!!________________");
+                  payload.objects[index].data = newCdata;
+                }
+              } else {
+                console.error("_________________________updatedata is empty!!________________");
+              }
             }
           } else {
             console.error('No matching record found');
@@ -237,6 +238,13 @@ outputErr = (err2) => {
   // apikey from baseconfig
   gfbio_apikey = config.config['plugin']['custom-data-type-gfbio'].config.apikey.apikey;
 
+  // endpointurl from baseconfig
+  endpointurl = config.config['plugin']['custom-data-type-gfbio'].config.endpointurl.endpointurl;
+
+  if (endpointurl.charAt(endpointurl.length - 1) === '/') {
+    endpointurl = endpointurl.slice(0, -1);
+  }
+
   // database-languages
   databaseLanguages = config.config.system.config.languages.database;
   databaseLanguages = databaseLanguages.map((value, key, array) => {
@@ -249,14 +257,15 @@ outputErr = (err2) => {
   ////////////////////////////////////////////////////////////////////////////
   // availabilityCheck for gfbio-api
   ////////////////////////////////////////////////////////////////////////////
-  https.get('https://data.bioontology.org/ontologies/NCBITAXON?apikey=' + gfbio_apikey, res => {
+  let testURL = endpointurl + '/ontologies/ITIS?apikey=' + gfbio_apikey;
+  https.get(testURL, res => {
     let testData = [];
     res.on('data', chunk => {
       testData.push(chunk);
     });
     res.on('end', () => {
       const testVocab = JSON.parse(Buffer.concat(testData).toString());
-      if (testVocab.acronym == 'NCBITAXON') {
+      if (testVocab.acronym == 'ITIS') {
         ////////////////////////////////////////////////////////////////////////////
         // test successfull --> continue with custom-data-type-update
         ////////////////////////////////////////////////////////////////////////////

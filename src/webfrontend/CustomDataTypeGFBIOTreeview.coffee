@@ -11,7 +11,7 @@ class GFBIO_ListViewTree
     #############################################################################
     # construct
     #############################################################################
-    constructor: (@popover = null, @editor_layout = null, @cdata = null, @cdata_form = null, @context = null, @gfbio_opts = {}, @vocParameter = 'ITIS', @apikey = '') ->
+    constructor: (@popover = null, @editor_layout = null, @cdata = null, @cdata_form = null, @context = null, @gfbio_opts = {}, @vocParameter = 'ITIS', @apikey = '', @endpointurl) ->
 
         options =
           class: "gfbioPlugin_Treeview"
@@ -50,7 +50,7 @@ class GFBIO_ListViewTree
         topTree_xhr = { "xhr" : undefined }
 
         # start new request to GFBIO-API and get topconcepts of vocabulary
-        url = 'https://data.bioontology.org/ontologies/' + vocName + '/classes/roots' + '?apikey=' + that.apikey + '&include=hasChildren,prefLabel&pagesize=1000'
+        url = that.endpointurl + '/ontologies/' + vocName + '/classes/roots' + '?apikey=' + that.apikey + '&include=hasChildren,prefLabel&pagesize=100'
         topTree_xhr.xhr = new (CUI.XHR)(url: url)
         topTree_xhr.xhr.start().done((data, status, statusText) ->
           # remove loading row (if there is one)
@@ -93,6 +93,7 @@ class GFBIO_ListViewTree
                 gfbio_opts: that.gfbio_opts
                 editor_layout: that.editor_layout
                 apikey: that.apikey
+                endpointurl: that.endpointurl
 
             that.treeview.addNode(newNode)
           # refresh popup, because its content has changed (new height etc)
@@ -148,6 +149,8 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
              check: CUI.HorizontalLayout
           apikey:
              check: String
+          endpointurl:
+             check: String
 
     readOpts: ->
        super()
@@ -168,7 +171,9 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
 
         # start new request to GFBIO-API
         # https://data.bioontology.org/ontologies/NCBITAXON/classes/http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FNCBITAXON%2F10239/children
-        url = ' https://data.bioontology.org/ontologies/' + @_vocParameter + '/classes/' + encodeURIComponent(@_uri) + '/children?apikey=' + that.opts.apikey + '&include=hasChildren,prefLabel&pagesize=1000'
+        console.log "that", that
+        console.log "that.endpointurl", that.opts.endpointurl
+        url = that.opts.endpointurl + '/ontologies/' + @_vocParameter + '/classes/' + encodeURIComponent(@_uri) + '/children?apikey=' + that.opts.apikey + '&include=hasChildren,prefLabel&pagesize=100'
         getChildren_xhr ={ "xhr" : undefined }
         getChildren_xhr.xhr = new (CUI.XHR)(url: url)
         getChildren_xhr.xhr.start().done((data, status, statusText) ->
@@ -207,6 +212,7 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
                 gfbio_opts: that._gfbio_opts
                 editor_layout: that._editor_layout
                 apikey: that.opts.apikey
+                endpointurl: that.opts.endpointurl
             children.push(newNode)
           dfr.resolve(children)
         )
@@ -245,7 +251,7 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
                             tooltip:
                               text: tooltipText
                             onClick: =>
-                              allDataAPIPath = 'https://data.bioontology.org/ontologies/' + that.opts.vocParameter + '/classes/' + encodeURIComponent(that.opts.uri) + '?apikey=' + that.opts.apikey
+                              allDataAPIPath = that.opts.endpointurl + '/ontologies/' + that.opts.vocParameter + '/classes/' + encodeURIComponent(that.opts.uri) + '?apikey=' + that.opts.apikey
                               # XHR for basic information
                               dataEntry_xhr = new (CUI.XHR)(url: allDataAPIPath)
                               dataEntry_xhr.start().done((resultJSON, status, statusText) ->

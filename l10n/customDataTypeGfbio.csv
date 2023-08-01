@@ -53,9 +53,12 @@ custom.data.type.gfbio.modal.form.popup.choose_expertsearchmode_.include_childre
 custom.data.type.gfbio.modal.form.popup.choose_expertsearchmode_label,Suchmodus für Expertensuche wählen,Select search mode for expert search
 custom.data.type.gfbio.modal.form.popup.choose_expertsearchmode_label2,Was wollen Sie finden? Nur exakte Treffer oder auch alle Kinder und Kindeskinder ihrer Suchauswahl?,What do you want to find? Only exact hits or also all children and grandchildren in your search selection?
 custom.data.type.gfbio.modal.form.popup.choose_expertsearchmode_label3,Ausgewählt,Selected
+server.config.name.system.endpointurl,API-URL,API-URL
+server.config.parameter.system.endpointurl.endpointurl.label,API-URL,API-URL
 custom.data.type.commons.popover.choose.label,Auswahl treffen,choose
 custom.data.type.commons.modal.form.popup.loadingstring,Lade Informationen,loading
 custom.data.type.commons.controls.search.label,Suchen,Search
 custom.data.type.commons.controls.detailinfo.label,Detailinfo, Details
 custom.data.type.commons.controls.calluri.label,Uri aufrufen,Call URI
 custom.data.type.commons.controls.delete.label,Löschen,Delete
+custom.data.type.gfbio.config.parameter.mask.overwrite_ontology_configuration.value.label,Ontology-Konfiguration aus Schema überschreiben,Overwrite ontology-configuration from schema

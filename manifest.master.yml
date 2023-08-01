@@ -40,6 +40,10 @@ custom_types:
             value:
               type: select
               options: ["popover", "popover_treeview"]
+        - name: overwrite_ontology_configuration
+          parameters:
+            value:
+              type: text
     update:
       exec:
         service: "node"
@@ -59,12 +63,18 @@ custom_types:
       expires_days: 1
       interval_base_config: update_interval_gfbio.days
 base_config:
+  - name: endpointurl
+    group: endpointurl
+    parameters:
+      endpointurl:
+        type: text
+        position: 0
   - name: apikey
     group: apikey
     parameters:
       apikey:
         type: text
-        position: 0
+        position: 1
   - name: update_interval_gfbio
     group: update_custom_data_type
     parameters:
@@ -72,4 +82,4 @@ base_config:
         type: int
         min: 0
         default: 0
-        position: 0
+        position: 2

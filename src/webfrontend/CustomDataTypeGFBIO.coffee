@@ -45,6 +45,12 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
   #######################################################################
   # returns name of the given vocabulary from datamodel
   getVocabularyNameFromDatamodel: (opts = {}) ->
+    # if vocnotation is given in mask, use from masksettings
+    fromMask = @getCustomMaskSettings()?.overwrite_ontology_configuration?.value
+    if fromMask
+      return fromMask
+
+    # else use from datamodel-config
     vocNotation = @getCustomSchemaSettings().vocabulary_notation?.value
     return vocNotation
 
@@ -54,6 +60,15 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
     baseConfig = ez5.session.getBaseConfig("plugin", "custom-data-type-gfbio")
     apikey = baseConfig?.apikey?.apikey
     return apikey
+
+  #######################################################################
+  # returns api-key from baseconfig
+  getApiEndpointFromBaseconfig: ->
+    baseConfig = ez5.session.getBaseConfig("plugin", "custom-data-type-gfbio")
+    endpointurl = baseConfig?.endpointurl?.endpointurl
+    if endpointurl.charAt(endpointurl.length - 1) == '/'
+      endpointurl = endpointurl.slice(0, -1)
+    return endpointurl
 
   #######################################################################
   # returns name of the needed or configures language for the labels of api-requests
@@ -309,7 +324,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
         vocParameter = that.getActiveVocabularyName(cdata)
 
         # start request
-        url = 'https://data.bioontology.org/search?q=' + gfbio_searchstring + '&ontologies=' + vocParameter + '&apikey=' + that.getApiKeyFromBaseconfig() + '&suggest=true&pagesize=' + gfbio_countSuggestions
+        url = that.getApiEndpointFromBaseconfig() + '/search?q=' + gfbio_searchstring + '&ontologies=' + vocParameter + '&apikey=' + that.getApiKeyFromBaseconfig() + '&suggest=true&pagesize=' + gfbio_countSuggestions
         searchsuggest_xhr.xhr = new (CUI.XHR)(url: url)
         searchsuggest_xhr.xhr.start().done((data, status, statusText) ->
 
@@ -450,7 +465,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
                   uriInfoParts = searchUri.split('@')
                   searchUri = uriInfoParts[0]
                   vocNotation = uriInfoParts[1]
-                  allDataAPIPath = 'https://data.bioontology.org/ontologies/' + vocNotation + '/classes/' + encodeURIComponent(searchUri) + '?apikey=' + that.getApiKeyFromBaseconfig()
+                  allDataAPIPath = that.getApiEndpointFromBaseconfig() + '/ontologies/' + vocNotation + '/classes/' + encodeURIComponent(searchUri) + '?apikey=' + that.getApiKeyFromBaseconfig()
                   # XHR for basic information
                   dataEntry_xhr = new (CUI.XHR)(url: allDataAPIPath)
                   dataEntry_xhr.start().done((resultJSON, status, statusText) ->
@@ -577,7 +592,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
     splittedVocs = that.getVocabularyNameFromDatamodel()
     splittedVocs = splittedVocs.split(',')
     if splittedVocs.includes vocNotation
-      allDataAPIPath = 'https://data.bioontology.org/ontologies/' + vocNotation + '/classes/' + uri + '?apikey=' + that.getApiKeyFromBaseconfig()
+      allDataAPIPath = that.getApiEndpointFromBaseconfig() + '/ontologies/' + vocNotation + '/classes/' + uri + '?apikey=' + that.getApiKeyFromBaseconfig()
       extendedInfo_xhr.xhr = new (CUI.XHR)(url: allDataAPIPath)
       extendedInfo_xhr.xhr.start()
       .done((resultJSON, status, statusText) ->
@@ -614,7 +629,8 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
       vocParameter = vocParameter[0]
 
     apikey = that.getApiKeyFromBaseconfig()
-    treeview = new GFBIO_ListViewTree(popover, layout, cdata, cdata_form, that, opts, vocParameter, apikey)
+    endpointurl = that.getApiEndpointFromBaseconfig()
+    treeview = new GFBIO_ListViewTree(popover, layout, cdata, cdata_form, that, opts, vocParameter, apikey, endpointurl)
 
     # maybe deferred is wanted?
     if returnDfr == false
@@ -734,7 +750,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
                 #for uri in items
                 vocnotation = items[0]
                 originalDANTEUri = uri
-                uri = 'https://data.bioontology.org/ontologies/' + vocnotation + '?apikey=' + that.getApiKeyFromBaseconfig()
+                uri = that.getApiEndpointFromBaseconfig() + '/ontologies/' + vocnotation + '?apikey=' + that.getApiKeyFromBaseconfig()
                 deferred = new CUI.Deferred()
                 extendedInfo_xhr = new (CUI.XHR)(url: uri)
                 extendedInfo_xhr.start()
@@ -839,7 +855,7 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
             class: "pluginResultButton"
             appearance: "link"
             size: "normal"
-            href: 'https://uri.gbv.de/terminology/?uri=' + encodedURI
+            href: that.getApiEndpointFromBaseconfig() + '/?uri=' + encodedURI
             target: "_blank"
             class: "cdt_gfbio_smallMarginTop"
             tooltip:
