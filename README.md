@@ -36,11 +36,12 @@ The plugin appears as a separate data type in the data model of object types and
 * Editor-style:
   * popup
   * popup with treeview
+* Overwrite ontology-configuration from schema
 
 
 ### baseconfiguration
 The update mechanism for the plugin data can be configured here.
-
+* endpointurl
 * apikey
   * GFBio-Apikey (if needed)
 * days between updates
