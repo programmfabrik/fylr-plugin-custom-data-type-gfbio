@@ -45,6 +45,8 @@ custom_types:
             value:
               type: text
     update:
+      plugin_user:
+        reference: system:root
       exec:
         service: "node"
         commands:
