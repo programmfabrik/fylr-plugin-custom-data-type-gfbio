@@ -27,7 +27,13 @@ build: clean ## clean, compile, copy files to build folder
 					cp easydb-library/src/commons.coffee src/tmp
 					cp src/webfrontend/*.coffee src/tmp
 					cd src/tmp && coffee -b --compile ${COFFEE_FILES} # bare-parameter is obligatory!
-					cat src/tmp/*.js > build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+                    
+					cat src/tmp/commons.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+                    
+					cat src/tmp/CustomDataTypeGFBIO.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+					cat src/tmp/CustomDataTypeGFBIOFacet.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+					cat src/tmp/CustomDataTypeGFBIOTreeview.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+					cat src/tmp/GFBIOUtilities.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
 
 					cp src/updater/GFBIOUpdater.js build/$(PLUGIN_NAME)/updater/GfbioUpdater.js # build updater
 					cat src/tmp/GFBIOUtilities.js >> build/$(PLUGIN_NAME)/updater/GfbioUpdater.js

@@ -171,8 +171,6 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
 
         # start new request to GFBIO-API
         # https://data.bioontology.org/ontologies/NCBITAXON/classes/http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FNCBITAXON%2F10239/children
-        console.log "that", that
-        console.log "that.endpointurl", that.opts.endpointurl
         url = that.opts.endpointurl + '/ontologies/' + @_vocParameter + '/classes/' + encodeURIComponent(@_uri) + '/children?apikey=' + that.opts.apikey + '&include=hasChildren,prefLabel&pagesize=100'
         getChildren_xhr ={ "xhr" : undefined }
         getChildren_xhr.xhr = new (CUI.XHR)(url: url)
@@ -293,6 +291,10 @@ class GFBIO_ListViewTreeNode extends CUI.ListViewTreeNode
                                   if that._gfbio_opts?.callFromExpertSearch == true
                                     CustomDataTypeGFBIO.prototype.__chooseExpertHierarchicalSearchMode(that._cdata, that._editor_layout, resultJSON, that._editor_layout, that._gfbio_opts)
 
+                                  # add custom mask settings to opts
+                                  if that?._context?.FieldSchema?.custom_settings
+                                    that._gfbio_opts.custom_settings = that._context.FieldSchema.custom_settings
+                                    
                                   # update form
                                   CustomDataTypeGFBIO.prototype.__updateResult(that._cdata, that._editor_layout, that._gfbio_opts)
                                   # hide popover

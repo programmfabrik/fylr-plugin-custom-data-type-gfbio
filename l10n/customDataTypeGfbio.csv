@@ -62,3 +62,6 @@ custom.data.type.commons.controls.detailinfo.label,Detailinfo, Details
 custom.data.type.commons.controls.calluri.label,Uri aufrufen,Call URI
 custom.data.type.commons.controls.delete.label,Löschen,Delete
 custom.data.type.gfbio.config.parameter.mask.overwrite_ontology_configuration.value.label,Ontology-Konfiguration aus Schema überschreiben,Overwrite ontology-configuration from schema
+custom.data.type.gfbio.config.parameter.mask.editor_display.value.label,Editor-Ansicht,Editor-Display
+custom.data.type.gfbio.config.option.mask.editor_display.value.default,Standard,Default
+custom.data.type.gfbio.config.option.mask.editor_display.value.condensed,1 Zeile,One-liner
