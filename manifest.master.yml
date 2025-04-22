@@ -68,7 +68,7 @@ custom_types:
       timeout: 60
       batch_size: 1
       expires_days: 1
-      interval_base_config: update_interval_gfbio.days
+
 base_config:
   - name: endpointurl
     group: endpointurl
@@ -82,11 +82,22 @@ base_config:
       apikey:
         type: text
         position: 1
-  - name: update_interval_gfbio
+  - name: update_gfbio
     group: update_custom_data_type
     parameters:
-      days:
-        type: int
-        min: 0
-        default: 0
+      restrict_time:
+        type: bool
+        default: false
         position: 2
+      from_time:
+        type: int
+        default: 19
+        min: 0
+        max: 24
+        position: 3
+      to_time:
+        type: int
+        default: 4
+        min: 0
+        max: 24
+        position: 4

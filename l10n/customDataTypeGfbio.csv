@@ -1,9 +1,9 @@
 key,de-DE,en-US
 server.config.name.system.apikey,API-Key, API-Key
 server.config.parameter.system.apikey.apikey.label,API-Key, API-Key
-server.config.name.system.update_interval_gfbio,Updateeinstellungen für gfbio-Verknüpfungen,Update settings for gfbio-Relations
-server.config.parameter.system.update_interval_gfbio.days.label,Tage zwischen Updates,Days between updates
-server.config.parameter.system.update_interval_gfbio.default_language.label,Standard-Datensprache als Fallback für Update (ISO 639-1),Default-data-language (as fallback) for update (ISO 639-1)
+server.config.name.system.update_gfbio,Updateeinstellungen für gfbio-Verknüpfungen,Update settings for gfbio-Relations
+server.config.parameter.system.update_gfbio.days.label,Tage zwischen Updates,Days between updates
+server.config.parameter.system.update_gfbio.default_language.label,Standard-Datensprache als Fallback für Update (ISO 639-1),Default-data-language (as fallback) for update (ISO 639-1)
 custom.data.type.gfbio.name,gfbio-Verknüpfung,gfbio-Relation
 custom.data.type.gfbio.subtree_id.name,Eltern-URI,SUBTREE-URI
 custom.data.type.gfbio.language.name,Sprache,Language
