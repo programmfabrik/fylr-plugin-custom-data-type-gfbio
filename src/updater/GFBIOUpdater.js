@@ -159,7 +159,10 @@ main = (payload) => {
                             resultJSON = matchingRecordData.data;
                             if (resultJSON) {
                                 // get desired language for preflabel. This is frontendlanguage from original data...
-                                let desiredLanguage = originalCdata.frontendLanguage;
+                                let desiredLanguage = 'de';
+                                if(originalCdata?.frontendLanguage?.length == 2) {
+                                    desiredLanguage = originalCdata.frontendLanguage;
+                                }
                                 // save conceptName
                                 newCdata.conceptName = resultJSON.prefLabel;
                                 // save conceptURI
@@ -173,7 +176,7 @@ main = (payload) => {
                                 // save facet
                                 newCdata.facetTerm = GFBIOUtilities.getFacetTermFromJSONObject(resultJSON, databaseLanguages);
                                 // save frontend language (same as given)
-                                newCdata.frontendLanguage = originalCdata.frontendLanguage;
+                                newCdata.frontendLanguage = desiredLanguage;
                             }
                         }
 
