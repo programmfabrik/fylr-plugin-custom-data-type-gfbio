@@ -1,12 +1,10 @@
-class CustomDataTypeGFBIO extends CustomDataTypeWithCommons
+class CustomDataTypeGFBIO extends CustomDataTypeWithCommonsAsPlugin
 
   #######################################################################
   # configure used facet
   getFacet: (opts) ->
       opts.field = @
-      new CustomDataTypeCommonFacet(opts)
-      # TODO
-      # new CustomDataTypeGFBIOFacet(opts)
+      new CustomDataTypeGFBIOFacet(opts)
 
   #######################################################################
   # return name of plugin

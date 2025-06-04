@@ -18,6 +18,9 @@ The ZIP can be downloaded and installed using the plugin manager, or used direct
 
 Github has an overview page to get a list of [all release](https://github.com/programmfabrik/fylr-plugin-custom-data-type-gfbio/releases/).
 
+## requirements
+This plugin requires https://github.com/programmfabrik/fylr-plugin-commons-library. In order to use this Plugin, you need to add the [commons-library-plugin](https://github.com/programmfabrik/fylr-plugin-commons-library) to your pluginmanager.
+
 ## configuration
 
 As defined in `manifest.yml` this datatype can be configured:

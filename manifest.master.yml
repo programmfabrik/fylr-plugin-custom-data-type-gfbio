@@ -12,6 +12,8 @@ plugin:
   webfrontend:
     url: customDataTypeGfbio.js
     css: customDataTypeGfbio.css
+    dependencies:
+      - commons-library
 
 base_url_prefix: "webfrontend"
 
