@@ -158,10 +158,6 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommonsAsPlugin
   getSearchFilter: (data, key=@name()) ->
       that = @
 
-      objecttype = @path()
-      objecttype = objecttype.split('.')
-      objecttype = objecttype[0]
-
       # search for empty values
       if data[key+":unset"]
           filter =
@@ -171,6 +167,9 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommonsAsPlugin
           filter._unnest = true
           filter._unset_filter = true
           return filter
+
+      else if data[key+":has_value"]
+        return @getHasValueFilter(data, key)          
 
       # dropdown or popup without tree or use of searchbar: use sameas
       if ! that.renderPopupAsTreeview() || ! data[key]?.experthierarchicalsearchmode
@@ -234,17 +233,16 @@ class CustomDataTypeGFBIO extends CustomDataTypeWithCommonsAsPlugin
   # make tag for expert-search
   #######################################################################
   getQueryFieldBadge: (data) ->
-      if ! data[@name()]
-          value = $$("field.search.badge.without")
-      else if ! data[@name()]?.conceptURI
-          value = $$("field.search.badge.without")
+      if data["#{@name()}:unset"]
+        value = $$("text.column.badge.without")
+      else if data["#{@name()}:has_value"]
+        value = $$("field.search.badge.has_value")
       else
           value = data[@name()].conceptName
 
       if data[@name()]?.experthierarchicalsearchmode == 'exact' || data[@name()]?.experthierarchicalsearchmode == 'include_children'
         searchModeAddition = $$("custom.data.type.gfbio.modal.form.popup.choose_expertsearchmode_." + data[@name()].experthierarchicalsearchmode + "_short")
         value = searchModeAddition + ': ' + value
-
 
       name: @nameLocalized()
       value: value
