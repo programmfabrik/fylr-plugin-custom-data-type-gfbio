@@ -14,7 +14,7 @@ let info = {}
 let access_token = '';
 
 if (process.argv.length >= 3) {
-        info = JSON.parse(process.argv[2])
+    info = JSON.parse(process.argv[2])
 }
 
 function hasChanges(objectOne, objectTwo) {
@@ -30,25 +30,37 @@ function hasChanges(objectOne, objectTwo) {
 }
 
 function getConfigFromAPI() {
-                return new Promise((resolve, reject) => {
-                                var url = 'http://fylr.localhost:8081/api/v1/config?access_token=' + access_token
-                                fetch(url, {
-                                                                headers: {
-                                                                                'Accept': 'application/json'
-                                                                },
-                                                })
-                                                .then(response => {
-                                                                if (response.ok) {
-                                                                                resolve(response.json());
-                                                                } else {
-                                                                                console.error("DANTE-Updater: Fehler bei der Anfrage an /config ");
-                                                                }
-                                                })
-                                                .catch(error => {
-                                                                console.error(error);
-                                                                console.error("DANTE-Updater: Fehler bei der Anfrage an /config");
-                                                });
-                });
+    return new Promise((resolve, reject) => {
+        var url = 'http://fylr.localhost:8081/api/v1/config?access_token=' + access_token
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    resolve(response.json());
+                } else {
+                    console.error("DANTE-Updater: Fehler bei der Anfrage an /config ");
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                console.error("DANTE-Updater: Fehler bei der Anfrage an /config");
+            });
+    });
+}
+
+function isInTimeRange(currentHour, fromHour, toHour) {
+    if (fromHour === toHour) {
+        return true;
+    }
+
+    if (fromHour < toHour) { // same day
+        return currentHour >= fromHour && currentHour < toHour;
+    } else { // through the night
+        return currentHour >= fromHour || currentHour < toHour;
+    }
 }
 
 main = (payload) => {
@@ -98,7 +110,7 @@ main = (payload) => {
                 requestUrls.push(hierarchieRequest);
             });
 
-            Promise.all(requestUrls).then(function(responses) {
+            Promise.all(requestUrls).then(function (responses) {
                 let results = [];
                 // Get a JSON object from each of the responses
                 responses.forEach((response, index) => {
@@ -120,7 +132,7 @@ main = (payload) => {
                     results.push(result);
                 });
                 return Promise.all(results.map(result => result.data));
-            }).then(function(data) {
+            }).then(function (data) {
                 let results = [];
                 data.forEach((data, index) => {
                     let url = requests[index].url;
@@ -160,7 +172,7 @@ main = (payload) => {
                             if (resultJSON) {
                                 // get desired language for preflabel. This is frontendlanguage from original data...
                                 let desiredLanguage = 'de';
-                                if(originalCdata?.frontendLanguage?.length == 2) {
+                                if (originalCdata?.frontendLanguage?.length == 2) {
                                     desiredLanguage = originalCdata.frontendLanguage;
                                 }
                                 // save conceptName
@@ -272,7 +284,7 @@ outputErr = (err2) => {
             const now = new Date();
             const hour = now.getHours();
             // check if hours do not match
-            if (hour < gfbio_config.from_time && hour >= gfbio_config.to_time) {
+            if (!isInTimeRange(hour, gfbio_config.from_time, gfbio_config.to_time)) {
                 // exit if hours do not match
                 outputData({
                     "state": {
@@ -280,13 +292,13 @@ outputErr = (err2) => {
                         "log": ["hours do not match, cancel update"]
                     }
                 });
-            }
+              }
         }
     }
-        
+
     access_token = info && info.plugin_user_access_token;
 
-    if(access_token) {
+    if (access_token) {
 
         ////////////////////////////////////////////////////////////////////////////
         // get config and read the languages
