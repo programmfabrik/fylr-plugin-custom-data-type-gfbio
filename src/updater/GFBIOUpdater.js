@@ -63,6 +63,15 @@ function isInTimeRange(currentHour, fromHour, toHour) {
     }
 }
 
+function getNewCustomExpiresAt() {
+    const newExpiresAt = new Date()
+    const customExpirationConfig = info?.config?.plugin?.['custom-data-type-gnd']?.config?.update_gnd?.custom_expires_days || 1
+
+    newExpiresAt.setDate(newExpiresAt.getDate() + customExpirationConfig);
+
+    return newExpiresAt.toISOString()
+}
+
 main = (payload) => {
     switch (payload.action) {
         case "start_update":
@@ -217,7 +226,11 @@ main = (payload) => {
                                 if (hasChanges(payload.objects[index].data, newCdata)) {
                                     console.error("_________________________has changes!!________________");
                                     payload.objects[index].data = newCdata;
+                                } else {
+                                    payload.objects[index].data = originalCdata
                                 }
+                                // set expires at for the custom data object according to the plugin base config
+                                payload.objects[index].data._expires_at = getNewCustomExpiresAt()
                             } else {
                                 console.error("_________________________updatedata is empty!!________________");
                             }
@@ -292,7 +305,7 @@ outputErr = (err2) => {
                         "log": ["hours do not match, cancel update"]
                     }
                 });
-              }
+            }
         }
     }
 

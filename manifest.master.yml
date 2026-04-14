@@ -90,16 +90,21 @@ base_config:
       restrict_time:
         type: bool
         default: false
-        position: 2
+        position: 0
       from_time:
         type: int
         default: 19
         min: 0
         max: 24
-        position: 3
+        position: 1
       to_time:
         type: int
         default: 4
         min: 0
         max: 24
-        position: 4
+        position: 2
+      custom_expires_days:
+        type: int
+        min: 1
+        default: 1
+        position: 3
