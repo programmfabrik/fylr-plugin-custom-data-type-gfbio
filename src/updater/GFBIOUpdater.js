@@ -31,7 +31,7 @@ function hasChanges(objectOne, objectTwo) {
 
 function getConfigFromAPI() {
     return new Promise((resolve, reject) => {
-        var url = 'http://fylr.localhost:8081/api/v1/config?access_token=' + access_token
+        var url = info.api_url + '/api/v1/config?access_token=' + access_token
         fetch(url, {
             headers: {
                 'Accept': 'application/json'
@@ -338,7 +338,7 @@ outputErr = (err2) => {
             ////////////////////////////////////////////////////////////////////////////
             // availabilityCheck for gfbio-api
             ////////////////////////////////////////////////////////////////////////////
-            let testURL = endpointurl + '/ontologies/ITIS?apikey=' + gfbio_apikey;
+            let testURL = endpointurl + '/ontologies/DCAT?apikey=' + gfbio_apikey;
             https.get(testURL, res => {
                 let testData = [];
                 res.on('data', chunk => {
@@ -346,7 +346,7 @@ outputErr = (err2) => {
                 });
                 res.on('end', () => {
                     const testVocab = JSON.parse(Buffer.concat(testData).toString());
-                    if (testVocab.acronym == 'ITIS') {
+                    if (testVocab.acronym == 'DCAT') {
                         ////////////////////////////////////////////////////////////////////////////
                         // test successfull --> continue with custom-data-type-update
                         ////////////////////////////////////////////////////////////////////////////
