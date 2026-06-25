@@ -24,12 +24,16 @@ custom_types:
         type: text
       conceptURI:
         type: text
+        skipTerms: true
       conceptSource:
         type: text
+        skipTerms: true
       conceptAncestors:
         type: text
+        skipTerms: true
       facetTerm:
         type: text_l10n
+        skipTerms: true
     config:
       schema:
         - name: vocabulary_notation
