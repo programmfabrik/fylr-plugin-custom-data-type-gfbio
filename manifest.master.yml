@@ -6,8 +6,18 @@ plugin:
     de-DE: GFBIO-Verknüpfung
     en-US: GFBIO-Referencing
   info:
-    de-DE: Stellt Verknüpfungen zum gfbio-Terminology-Service her
-    en-US: Links to the gfbio-Terminology-Service
+    de-DE: |
+      Stellt einen eigenen Feldtyp bereit, mit dem Datensätze mit Konzepten des [GFBio Terminology Service](https://terminologies.gfbio.org/api/) verknüpft werden – einer Sammlung biologischer und umweltbezogener Ontologien (etwa NCBITAXON, NCIT und GO). Redakteure suchen und hinterlegen eine eindeutige Referenz, statt Begriffe frei einzugeben.
+
+      - Eine oder mehrere Ontologien (Vokabular-Notationen) pro Feld konfigurieren
+      - Editor-Darstellung: Popup oder Popup mit Baumansicht
+      - Automatischer Updater prüft und aktualisiert die gespeicherten Begriffe nach konfigurierbarem Zeitplan gegen die GFBio-API
+    en-US: |
+      Adds a custom data type for linking records to concepts from the [GFBio Terminology Service](https://terminologies.gfbio.org/api/), a collection of biological and environmental ontologies (for example NCBITAXON, NCIT and GO). Editors search and store an authoritative reference for a term instead of typing it as free text.
+
+      - Configure one or more ontologies (vocabulary notations) per field
+      - Editor styles: popup, or popup with tree view
+      - Automatic updater re-checks and refreshes stored terms against the GFBio API on a configurable schedule
   l10n: l10n/customDataTypeGfbio.csv
   webfrontend:
     url: customDataTypeGfbio.js
