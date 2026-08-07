@@ -12,7 +12,7 @@ The Plugins uses <https://terminologies.gfbio.org/api/> for the communication wi
 
 ## installation
 
-The latest version of this plugin can be found [here](https://github.com/programmfabrik/fylr-plugin-custom-data-type-gfbio/releases/latest/download/customDataTypeGfbio.zip).
+The latest version of this plugin can be found [here](https://github.com/programmfabrik/fylr-plugin-custom-data-type-gfbio/releases/latest/download/fylr-plugin-custom-data-type-gfbio.zip).
 
 The ZIP can be downloaded and installed using the plugin manager, or used directly (recommended).
 
