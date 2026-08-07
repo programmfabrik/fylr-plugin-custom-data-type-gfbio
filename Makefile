@@ -1,61 +1,44 @@
-ZIP_NAME ?= "customDataTypeGfbio.zip"
-PLUGIN_NAME = "custom-data-type-gfbio"
+# fylr plugins are built by fylr-build-plugin, the build driver that knows how
+# a fylr plugin is put together (compile, assemble build/, zip, seal, loca).
+# This Makefile is a thin shim for muscle memory — all logic lives in the
+# tool. @latest always resolves the tool's newest release, so plugins pick up
+# fixes without being touched; an incompatible tool change would come as a new
+# major version (import path .../v2), which is the only event that changes
+# this line.
+#
+# Tools needed (each only for the features this plugin uses):
+#   go       runs fylr-build-plugin — https://go.dev/dl/
+#   coffee   CoffeeScript 1.x:  npm install -g coffeescript@1.12.7
+#   sass     npm install -g sass
+FYLR_BUILD_PLUGIN ?= go run github.com/programmfabrik/fylr-build-plugin@latest
 
-# coffescript-files to compile
-COFFEE_FILES = GFBIOUtilities.coffee \
-	CustomDataTypeGFBIO.coffee \
-	CustomDataTypeGFBIOFacet.coffee \
-	CustomDataTypeGFBIOTreeview.coffee
+# The tool itself reads NO environment variables — everything is passed as
+# flags. The release workflow's RELEASE_TAG env is translated into a flag
+# right here. The zip's NAME is not passed: fylr-build-plugin always names it
+# <repo>.zip, which is the naming rule for every fylr plugin release.
+RELEASE_FLAGS = $(if $(RELEASE_TAG),-release "$(RELEASE_TAG)")
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 all: build ## build all
 
-build: clean buildinfojson ## clean, compile, copy files to build folder
+build: ## build the plugin into build/<name>/ — loadable by fylr via plugin.paths
+	$(FYLR_BUILD_PLUGIN) build $(RELEASE_FLAGS)
 
-					npm install --save node-fetch # install needed node-module
+zip: ## build the release zip
+	$(FYLR_BUILD_PLUGIN) zip $(RELEASE_FLAGS)
 
-					mkdir -p build
-					mkdir -p build/$(PLUGIN_NAME)
-					mkdir -p build/$(PLUGIN_NAME)/webfrontend
-					mkdir -p build/$(PLUGIN_NAME)/updater
-					mkdir -p build/$(PLUGIN_NAME)/l10n
+seal: ## build + seal the release zip (fylr dev/CI key unless -pubkey is passed to the tool)
+	$(FYLR_BUILD_PLUGIN) seal $(RELEASE_FLAGS)
 
-					mkdir -p src/tmp # build code from coffee
-					cp src/webfrontend/*.coffee src/tmp
-					cd src/tmp && coffee -b --compile ${COFFEE_FILES} # bare-parameter is obligatory!
-                                        
-					cat src/tmp/CustomDataTypeGFBIO.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
-					cat src/tmp/CustomDataTypeGFBIOFacet.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
-					cat src/tmp/CustomDataTypeGFBIOTreeview.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
-					cat src/tmp/GFBIOUtilities.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.js
+loca: ## pull the loca CSV from its Google Sheets master (build.yml)
+	$(FYLR_BUILD_PLUGIN) loca
 
-					cp src/updater/GFBIOUpdater.js build/$(PLUGIN_NAME)/updater/GfbioUpdater.js # build updater
-					cat src/tmp/GFBIOUtilities.js >> build/$(PLUGIN_NAME)/updater/GfbioUpdater.js
-					cp package.json build/$(PLUGIN_NAME)/package.json
-					cp -r node_modules build/$(PLUGIN_NAME)/
-					rm -rf src/tmp # clean tmp
+check: ## validate the build tree against the manifest
+	$(FYLR_BUILD_PLUGIN) check
 
-					cp l10n/customDataTypeGfbio.csv build/$(PLUGIN_NAME)/l10n/customDataTypeGfbio.csv # copy l10n
+clean: ## clean build files
+	$(FYLR_BUILD_PLUGIN) clean
 
-					cp src/webfrontend/css/main.css build/$(PLUGIN_NAME)/webfrontend/customDataTypeGfbio.css # copy css
-					cp manifest.master.yml build/$(PLUGIN_NAME)/manifest.yml # copy manifest
-
-clean: ## clean
-				rm -rf build
-
-zip: build ## build zip file
-			cd build && zip ${ZIP_NAME} -r $(PLUGIN_NAME)/
-
-buildinfojson:
-	repo=`git remote get-url origin | sed -e 's/\.git$$//' -e 's#.*[/\\]##'` ;\
-	rev=`git show --no-patch --format=%H` ;\
-	lastchanged=`git show --no-patch --format=%ad --date=format:%Y-%m-%dT%T%z` ;\
-	builddate=`date +"%Y-%m-%dT%T%z"` ;\
-	echo '{' > build-info.json ;\
-	echo '  "repository": "'$$repo'",' >> build-info.json ;\
-	echo '  "rev": "'$$rev'",' >> build-info.json ;\
-	echo '  "lastchanged": "'$$lastchanged'",' >> build-info.json ;\
-	echo '  "builddate": "'$$builddate'"' >> build-info.json ;\
-	echo '}' >> build-info.json
+.PHONY: help all build zip seal loca check clean
