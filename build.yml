@@ -11,19 +11,24 @@
 server:
   install:
   - l10n/customDataTypeGfbio.csv
+  # assembled server-side files, sources in the order written
+  bundles:
+    - out: updater/GfbioUpdater.js
+      sources:
+      - src/updater/GFBIOUpdater.js
+      - webfrontend/GFBIOUtilities.coffee
 webfrontend:
-  coffee1:
-  - webfrontend/CustomDataTypeGFBIO.coffee
-  - webfrontend/CustomDataTypeGFBIOFacet.coffee
-  - webfrontend/CustomDataTypeGFBIOTreeview.coffee
-  - webfrontend/GFBIOUtilities.coffee
+  # assembled into plugin.webfrontend.url, in this order:
+  # .coffee is compiled (CoffeeScript 1.x), .scss compiled,
+  # anything else taken verbatim
+  bundles:
+    - sources:
+        - webfrontend/CustomDataTypeGFBIO.coffee
+        - webfrontend/CustomDataTypeGFBIOFacet.coffee
+        - webfrontend/CustomDataTypeGFBIOTreeview.coffee
+        - webfrontend/GFBIOUtilities.coffee
   install:
   - webfrontend/customDataTypeGfbio.css
-build:
-  bundles:
-  - out: updater/GfbioUpdater.js
-    sources:
-    - src/updater/GFBIOUpdater.js
-    - webfrontend/GFBIOUtilities.coffee
-  zip_aliases:
-  - customDataTypeGfbio.zip
+
+zip_aliases:
+- customDataTypeGfbio.zip
